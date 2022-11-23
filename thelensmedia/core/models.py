@@ -1,24 +1,45 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 
-# Create your models here.
-
-
-class Customer(models.Model):
-    name = models.CharField(max_length=200)
-    email = models.CharField(max_length=200)
-    phone = models.CharField(max_length=200)
-    date_created = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name
+# Create AbstractUser model
 
 
-class Product(models.Model):
-    name = models.CharField(max_length=200)
-    price = models.FloatField()
-    category = models.CharField(max_length=200, choices=CATEGORY)
-    description = models.CharField(max_length=200, blank=True)
-    date_created = models.DateTimeField(auto_now_add=True)
+class User(AbstractUser):
 
-    def __str__(self):
-        return self.name
+    # define user roles database fields
+    class Role(models.TextChoices):
+        ADMIN = 'admin'
+        Vendor = 'vendor'
+        Customer = 'customer'
+
+    # define base role
+    base_role = Role.ADMIN
+
+    # save the role of the user
+    role = models.CharField(max_length=50, choices=Role.choices)
+
+    # set default role to a user when they signup
+    def save(self, *args, **kwargs):
+        # if the user is not created
+        if not self.pk:
+            self.role = self.base_role
+            return super().save(*args, **kwargs)
+
+# Create Customer Model Manager
+
+
+class CustomerManager(BaseUserManager):
+    def get_queryset(self, *args, **kwargs):
+        results = super().get_queryset(*args, **kwargs)
+        return results.filter(role=User.Role.CUSTOMER)
+
+# register the a customer model
+
+
+class Customer(User):
+    base_role = User.Role.Customer
+
+    customer = CustomerManager()
+
+    class Meta:
+        proxy = True
