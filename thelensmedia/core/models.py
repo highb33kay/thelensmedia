@@ -5,7 +5,6 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 
 
 class User(AbstractUser):
-
     # define user roles database fields
     class Role(models.TextChoices):
         ADMIN = 'admin'
@@ -40,6 +39,25 @@ class Customer(User):
     base_role = User.Role.Customer
 
     customer = CustomerManager()
+
+    class Meta:
+        proxy = True
+
+# Vendor Model Manager
+
+
+class VendorManager(BaseUserManager):
+    def get_queryset(self, *args, **kwargs):
+        results = super().get_queryset(*args, **kwargs)
+        return results.filter(role=User.Role.VENDOR)
+
+# register the vendor model
+
+
+class Vendor(User):
+    base_role = User.Role.VENDOR
+
+    vendor = VendorManager()
 
     class Meta:
         proxy = True
