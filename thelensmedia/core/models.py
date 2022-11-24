@@ -43,6 +43,14 @@ class Customer(User):
     class Meta:
         proxy = True
 
+# customer profile model
+
+
+class CustomerProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    Customer = CustomerManager()
+
+
 # Vendor Model Manager
 
 
@@ -61,3 +69,10 @@ class Vendor(User):
 
     class Meta:
         proxy = True
+
+# vendor profile model
+
+
+class VendorProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    Vendor = VendorManager()
