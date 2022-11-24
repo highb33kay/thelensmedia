@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.urls import reverse
+from django.template.defaultfilters import slugify
 
 # Create AbstractUser model
 
@@ -48,7 +50,12 @@ class Customer(User):
 
 class CustomerProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    Customer = CustomerManager()
+    fname = models.CharField(max_length=50)
+    lname = models.CharField(max_length=50)
+    email = models.EmailField(max_length=50)
+
+    def str(self):
+        return self.user.username
 
 
 # Vendor Model Manager
@@ -75,4 +82,23 @@ class Vendor(User):
 
 class VendorProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    Vendor = VendorManager()
+    fname = models.CharField(max_length=50)
+    lname = models.CharField(max_length=50)
+    email = models.EmailField(max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    vendor_name = models.CharField(max_length=255)
+    bio = models.TextField()
+    logo = models.ImageField(upload_to='vendor_logo')
+    slug = models.SlugField(null=False, unique=True)
+
+    def __str__(self):
+        return self.vendor_name
+
+    def get_absolute_url(self):
+        return reverse('vendor_detail', kwargs={'slug': self.slug})
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.vendor_name)
+        return super().save(*args, **kwargs)
