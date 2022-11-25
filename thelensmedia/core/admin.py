@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import CustomerProfile, VendorProfile
+from .models import CustomerProfile, VendorProfile
 
 # Register your models here.
 
@@ -17,9 +17,9 @@ admin.site.register(CustomerProfile, CustomerProfileAdmin)
 
 class VendorProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'fname', 'lname', 'email', 'vendor_name',
-                    'bio', 'logo', 'created_at', 'updated_at', 'url')
+                    'bio', 'logo', 'created_at', 'updated_at', 'slug')
 
     prepopulated_fields = {'slug': ('vendor_name',)}
 
 
-admin.register(VendorProfile, VendorProfileAdmin)
+admin.site.register(VendorProfile, VendorProfileAdmin)

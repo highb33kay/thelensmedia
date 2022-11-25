@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.urls import reverse
 from django.template.defaultfilters import slugify
+from django.dispatch import receiver
+from django.db.models.signals import post_save
 
 # Create AbstractUser model
 
@@ -45,6 +47,14 @@ class Customer(User):
     class Meta:
         proxy = True
 
+# create the receiver for the customer model
+
+
+@receiver(post_save, sender=Customer)
+def create_customer_profile(sender, instance, created, **kwargs):
+    if created and instance.role == "CUSTOMER":
+        CustomerProfile.objects.create(user=instance)
+
 # customer profile model
 
 
@@ -70,7 +80,7 @@ class VendorManager(BaseUserManager):
 
 
 class Vendor(User):
-    base_role = User.Role.VENDOR
+    base_role = User.Role.Vendor
 
     vendor = VendorManager()
 
@@ -102,3 +112,9 @@ class VendorProfile(models.Model):
         if not self.slug:
             self.slug = slugify(self.vendor_name)
         return super().save(*args, **kwargs)
+
+
+@receiver(post_save, sender=Vendor)
+def create_vendor_profile(sender, instance, created, **kwargs):
+    if created and instance.role == "VENDOR":
+        VendorProfile.objects.create(user=instance)
