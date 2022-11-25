@@ -1,25 +1,6 @@
 from django.contrib import admin
-from .models import CustomerProfile, VendorProfile
-
-# Register your models here.
-
-# Register customer profile
+from .models import UserProfile
 
 
-class CustomerProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'fname', 'lname', 'email')
-
-
-admin.site.register(CustomerProfile, CustomerProfileAdmin)
-
-# register vendor profile
-
-
-class VendorProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'fname', 'lname', 'email', 'vendor_name',
-                    'bio', 'logo', 'created_at', 'updated_at', 'slug')
-
-    prepopulated_fields = {'slug': ('vendor_name',)}
-
-
-admin.site.register(VendorProfile, VendorProfileAdmin)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ['user', 'mobile', 'address', 'city', 'state']
