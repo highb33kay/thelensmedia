@@ -45,38 +45,9 @@ class Vendor(models.Model):
             self.slug = slugify(self.vendor_name)
         return super().save(*args, **kwargs)
 
-
-# transferable digital product model
-class Product(models.Model):
-
-    # generate a unique id for each product
-    product_id = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=100)
-    description = models.TextField()
-    price = models.DecimalField(max_digits=6, decimal_places=2)
-    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
-    Category = models.ForeignKey(Category)
-    image = models.ImageField(upload_to='Media/product_images/vendor')
-    file = models.FileField(upload_to='Media/product_files/vendor', )
-    created_by = models.ForeignKey(User, on_delete=models.PROTECT)
-    is_active = models.BooleanField(default=True)
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-    slug = models.SlugField(max_length=255)
-
-    class Meta:
-        verbose_name_plural = 'Products'
-        ordering = ('-created',)
-
-    def get_absolute_url(self):
-        return reverse('store:product_detail', args=[self.slug])
-
-    def __str__(self):
-        return self.name
-
-
 # product category model
+
+
 class Category(models.Model):
     categories = (
         ('Music', 'Music'),
@@ -89,15 +60,68 @@ class Category(models.Model):
     )
 
     Category = models.CharField(max_length=100, choices=categories)
-    name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True)
 
     class Meta:
         verbose_name_plural = 'Categories'
-        ordering = ('name',)
+        ordering = ('Category',)
 
     def get_absolute_url(self):
         return reverse('store:product_list_by_category', args=[self.slug])
+
+    def __str__(self):
+        return self.Category
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        return super().save(*args, **kwargs)
+
+# define the product owner model
+
+
+class ProductOwner(models.Model):
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = 'Product Owners'
+        ordering = ('vendor',)
+
+    def __str__(self):
+        return self.vendor.vendor_name
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+
+# transferable digital product model
+class Product(models.Model):
+
+    # generate a unique id for each product
+    product_id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
+    Category = models.ForeignKey(Category, on_delete=models.PROTECT)
+    image = models.ImageField(upload_to='Media/product_images/vendor')
+    file = models.FileField(upload_to='Media/product_files/vendor', )
+    available = models.BooleanField(default=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    slug = models.SlugField(max_length=255)
+
+    # auto populate the created_by field with the vendor name
+
+    class Meta:
+        verbose_name_plural = 'Products'
+        ordering = ('-created',)
+
+    def get_absolute_url(self):
+        return reverse('store:product_detail', args=[self.slug])
 
     def __str__(self):
         return self.name

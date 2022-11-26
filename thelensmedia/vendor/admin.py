@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Vendor
+from .models import Vendor, Category, Product
 # Register your models here.
 
 
@@ -9,3 +9,20 @@ class VendorAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Vendor, VendorAdmin)
+
+
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ['categories', 'slug']
+    prepopulated_fields = {'slug': ('Category',)}
+
+
+admin.site.register(Category, CategoryAdmin)
+
+
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ['name', 'description', 'vendor', 'Category', 'image',
+                    'file', 'price', 'available', 'created', 'updated', 'slug']
+    prepopulated_fields = {'slug': ('name',), }
+
+
+admin.site.register(Product, ProductAdmin)
