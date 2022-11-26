@@ -12,8 +12,8 @@ admin.site.register(Vendor, VendorAdmin)
 
 
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['categories', 'slug']
-    prepopulated_fields = {'slug': ('Category',)}
+    list_display = ['name', 'slug']
+    prepopulated_fields = {'slug': ('Category',), 'name': ('Category',)}
 
 
 admin.site.register(Category, CategoryAdmin)

@@ -60,7 +60,10 @@ class Category(models.Model):
     )
 
     Category = models.CharField(max_length=100, choices=categories)
+    name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100, unique=True)
+
+    # auto populate the name field with category name
 
     class Meta:
         verbose_name_plural = 'Categories'
