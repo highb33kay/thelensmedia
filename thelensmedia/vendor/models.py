@@ -9,6 +9,10 @@ from django.urls import reverse
 # import uuid
 import uuid
 from uuid import uuid4
+
+# import qr
+import qrcode
+
 # Create your models here.
 
 
@@ -57,6 +61,7 @@ class Category(models.Model):
         ('manuscript', 'Manuscript'),
         ('image', 'Image'),
         ('socials', 'Socials'),
+        ('ticket', 'Ticket'),
     )
 
     Category = models.CharField(max_length=100, choices=categories)
@@ -132,4 +137,50 @@ class Product(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
+        return super().save(*args, **kwargs)
+
+# Ticket model that extends the product model
+
+
+class Ticket(Product):
+    ticket_id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False)
+    ticket_name = models.CharField(max_length=100)
+    ticket_description = models.TextField()
+    ticket_price = models.DecimalField(max_digits=6, decimal_places=2)
+    ticket_category = models.ForeignKey(Category, on_delete=models.PROTECT)
+    ticket_image = models.ImageField(upload_to='Media/ticket_images/vendor')
+    ticket_file = models.FileField(upload_to='Media/ticket_files/vendor', )
+    ticket_available = models.BooleanField(default=True)
+    ticket_created = models.DateTimeField(auto_now_add=True)
+    ticket_updated = models.DateTimeField(auto_now=True)
+    ticket_slug = models.SlugField(max_length=255)
+
+    # generate ticket qr code
+
+    def generate_qr_code(self):
+        qr = qrcode.QRCode(
+            version=1,
+            box_size=10,
+            border=5
+        )
+        data = f"{self.ticket_id}"
+        qr.add_data(data)
+        qr.make(fit=True)
+        img = qr.make_image(fill='black', back_color='white')
+        img.save(f"Media/ticket_qr_codes/{self.ticket_id}.png")
+
+    class Meta:
+        verbose_name_plural = 'Tickets'
+        ordering = ('-ticket_created',)
+
+    def get_absolute_url(self):
+        return reverse('store:ticket_detail', args=[self.ticket_slug])
+
+    def __str__(self):
+        return self.ticket_name
+
+    def save(self, *args, **kwargs):
+        if not self.ticket_slug:
+            self.ticket_slug = slugify(self.ticket_name)
         return super().save(*args, **kwargs)
